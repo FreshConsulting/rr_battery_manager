@@ -1,2 +1,2 @@
-# rr_openrover_basic
-Documentation for this package can be found at http://wiki.ros.org/rr_openrover_basic
+# rr_battery_manager
+Unofficial battery package for rover robotics based on the deprecated rr_openrover_basic package
