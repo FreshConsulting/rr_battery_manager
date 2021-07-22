@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <string>
 
-#include <geometry_msgs/TwistStamped.h>
+#include <geometry_msgs/Twist.h>
 #include <std_msgs/Bool.h>
 #include "rr_openrover_basic/RawRrOpenroverBasicFastRateData.h"
 #include "rr_openrover_basic/RawRrOpenroverBasicMedRateData.h"
@@ -130,7 +130,7 @@ private:
   std::vector<unsigned char> serial_fan_buffer_;
 
   // ROS Subscriber callback functions
-  void cmdVelCB(const geometry_msgs::TwistStamped::ConstPtr& msg);
+  void cmdVelCB(const geometry_msgs::Twist::ConstPtr& msg);
   void fanSpeedCB(const std_msgs::Int32::ConstPtr& msg);
 
   // ROS Publish Functions (robot_data_[X] to ros topics)

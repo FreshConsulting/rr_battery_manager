@@ -14,7 +14,7 @@
 #include "std_msgs/Int32.h"
 #include "std_msgs/Int32MultiArray.h"
 #include "std_msgs/Float32MultiArray.h"
-#include "geometry_msgs/TwistStamped.h"
+#include "geometry_msgs/Twist.h"
 #include <std_msgs/Bool.h>
 #include "nav_msgs/Odometry.h"
 #include "rr_openrover_basic/RawRrOpenroverBasicFastRateData.h"
@@ -172,7 +172,7 @@ bool OpenRover::setupRobotParams()
   else if (drive_type_ == (std::string) "4wd")
   {
     ROS_INFO("4wd parameters loaded.");
-    odom_encoder_coef_ = ODOM_ENCODER_COEF_4WD;
+    odom_encoder_coef_ = ODOM_ENCODER_COEF_4WD / 2.025;
     odom_axle_track_ = ODOM_AXLE_TRACK_4WD;
     odom_angular_coef_ = ODOM_ANGULAR_COEF_4WD;
     odom_traction_factor_ = ODOM_TRACTION_FACTOR_4WD;
@@ -303,16 +303,15 @@ void OpenRover::fanSpeedCB(const std_msgs::Int32::ConstPtr& msg)
   return;
 }
 
-void OpenRover::cmdVelCB(const geometry_msgs::TwistStamped::ConstPtr& msg)
+void OpenRover::cmdVelCB(const geometry_msgs::Twist::ConstPtr& msg)
 {  // converts from cmd_vel (m/s and radians/s) into motor speed commands
-  cmd_vel_commanded_ = msg->twist;
+  // cmd_vel_commanded_ = msg->twist;
   float left_motor_speed, right_motor_speed;
   int flipper_motor_speed;
   int motor_speed_deadband_scaled;
-  double turn_rate = msg->twist.angular.z;
-  double linear_rate = msg->twist.linear.x;
-  double flipper_rate = msg->twist.angular.y;
-  std::string frame_id = msg->header.frame_id;
+  double turn_rate = msg->angular.z;
+  double linear_rate = msg->linear.x;
+  double flipper_rate = msg->angular.y;
 
   double diff_vel_commanded = turn_rate / odom_angular_coef_ / odom_traction_factor_;
 
@@ -320,24 +319,6 @@ void OpenRover::cmdVelCB(const geometry_msgs::TwistStamped::ConstPtr& msg)
   left_vel_commanded_ = linear_rate - 0.5 * diff_vel_commanded;
 
   timeout_timer.stop();
-
-  if (frame_id == (std::string) "soft e-stopped")
-  {
-    if (!e_stop_on_)
-    {
-      e_stop_on_ = true;
-      ROS_WARN("Openrover driver - Soft e-stop on.");
-    }
-    return;
-  }
-  else
-  {
-    if (e_stop_on_)
-    {
-      e_stop_on_ = false;
-      ROS_INFO("Openrover driver - Soft e-stop off.");
-    }
-  }
 
   flipper_motor_speed = ((int)round(flipper_rate * motor_speed_flipper_coef_) + 125) % 250;
 
