@@ -174,7 +174,7 @@ bool OpenRover::setupRobotParams()
     ROS_INFO("4wd parameters loaded.");
     odom_encoder_coef_ = ODOM_ENCODER_COEF_4WD / 2.025;
     odom_axle_track_ = ODOM_AXLE_TRACK_4WD;
-    odom_angular_coef_ = ODOM_ANGULAR_COEF_4WD;
+    odom_angular_coef_ = ODOM_ANGULAR_COEF_4WD / 1.375;
     odom_traction_factor_ = ODOM_TRACTION_FACTOR_4WD;
 
     motor_speed_linear_coef_ = MOTOR_SPEED_LINEAR_COEF_4WD_HS;
@@ -220,8 +220,8 @@ bool OpenRover::setupRobotParams()
 
   if (!(nh_priv_.getParam("odom_covariance_35", odom_covariance_35_)))
   {
-    ROS_WARN("Failed to retrieve odom_covariance_35 from parameter. Defaulting to 0.03");
-    odom_covariance_35_ = 0.03;
+    ROS_WARN("Failed to retrieve odom_covariance_35 from parameter. Defaulting to 0.3");
+    odom_covariance_35_ = 0.3;
   }
 
   ROS_INFO("Openrover parameters loaded:");
@@ -375,7 +375,7 @@ void OpenRover::publishOdometry(float left_vel, float right_vel)
   odom_msg.twist.twist.linear.x = net_vel;
   odom_msg.twist.twist.angular.z = alpha;
 
-  /*
+  
   // If not moving, trust the encoders completely
   // otherwise set them to the ROS param
   if (net_vel == 0 && alpha == 0)
@@ -390,17 +390,17 @@ void OpenRover::publishOdometry(float left_vel, float right_vel)
     odom_msg.twist.covariance[7] = odom_covariance_0_;
     odom_msg.twist.covariance[35] = odom_covariance_35_;
   }
-  */
+  
   // assign pose covariance
-  for (uint8_t i=0; i < 36; ++i)
-  {
-    odom_msg.pose.covariance[i] = covariance_pose_.at(i);
-  }
-  // assign pose covariance
-  for (uint8_t i=0; i < 36; ++i)
-  {
-    odom_msg.twist.covariance[i] = covariance_twist_.at(i);
-  }
+  // for (uint8_t i=0; i < 36; ++i)
+  // {
+  //   odom_msg.pose.covariance[i] = covariance_pose_.at(i);
+  // }
+  // // assign pose covariance
+  // for (uint8_t i=0; i < 36; ++i)
+  // {
+  //   odom_msg.twist.covariance[i] = covariance_twist_.at(i);
+  // }
 
   odom_msg.pose.pose.position.x = pos_x;
   odom_msg.pose.pose.position.y = pos_y;
